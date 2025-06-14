@@ -4,6 +4,7 @@ export default defineConfig({
   entry: ["src/index.tsx"],
   format: ["esm"],
   dts: true,
+  tsconfig: "./tsconfig.app.json",
   splitting: false,
   clean: true,
   sourcemap: true,

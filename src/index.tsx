@@ -104,7 +104,7 @@ const DrawLibre = forwardRef<DrawLibreRef, Props>(
           save: drawInstance.save,
         };
       },
-      [drawInstance]
+      [drawInstance],
     );
 
     useEvent(map, "mdl:rightclickremove", props.onRightClickRemove);
@@ -120,13 +120,13 @@ const DrawLibre = forwardRef<DrawLibreRef, Props>(
     useEvent(map, "mdl:redostackchanged", props.onRedoStackChanged);
 
     return null;
-  }
+  },
 );
 
 const useEvent = (
   map: MapboxMap | LibreMap,
   eventName: string,
-  callback: ((event: any) => void) | undefined
+  callback: ((event: any) => void) | undefined,
 ) => {
   useEffect(() => {
     if (!map) return;

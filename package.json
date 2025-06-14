@@ -1,63 +1,62 @@
 {
-	"name": "draw-libre-react",
-	"version": "0.1.0",
-	"description": "React wrapper for the draw-libre library.",
-	"private": false,
-	"type": "module",
-	"scripts": {
-	  "build": "tsup",
-	  "build:w": "tsup --watch",
-	  "dev": "tsc -w",
-	  "lint": "tsc",
-	  "prettier": "prettier --write .",
-	  "exports": "attw --pack .",
-	  "ci": "npm run lint && npm run prettier && npm run build",
-	  "release": "npm run ci",
-	  "prepublishOnly": "npm run ci"
-	},
-	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/UsikianLevon/draw-libre-react.git"
-	},
-	"keywords": [
-	  "maplibre",
-	  "mapbox",
-	  "draw",
-	  "draw-libre"
-	],
-	"author": "Usikian Levon <levonhusikyan@gmail.com>",
-	"license": "MIT",
-	"bugs": {
-	  "url": "https://github.com/UsikianLevon/draw-libre-react/issues"
-	},
-	"homepage": "https://github.com/UsikianLevon/draw-libre-react#readme",
-	"files": [
-	  "dist"
-	],
-	"peerDependencies": {
-		"draw-libre": ">=0.5.0",
-		"mapbox-gl": ">=1",
-		"maplibre-gl": ">=2",
-		"react": ">=16.14.0",
-		"react-dom": ">=16.14.0"
-	},
-	"devDependencies": {
-		"@types/react": "^16.14.0",
-		"prettier": "3.2.5",
-		"tsup": "^8.5.0",
-		"typescript": "^5.8.3"
-	},
-	"main": "dist/index.js",
-	"browser": "dist/index.js",
-	"style": "dist/index.css",
-	"exports": {
-	  ".": {
-		"types": "./dist/index.d.ts",
-		"import": "./dist/index.js",
-		"default": "./dist/index.js"
-	  },
-	  "./dist/index.css": "./dist/index.css"
-	},
-	"sideEffects": false
-  }
-  
+  "name": "draw-libre-react",
+  "version": "0.1.0",
+  "description": "React wrapper for the draw-libre library.",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "build:w": "tsup --watch",
+    "dev": "tsc -w",
+    "lint": "tsc",
+    "prettier": "prettier --write .",
+    "exports": "attw --pack .",
+    "ci": "npm run lint && npm run prettier && npm run build",
+    "release": "npm run ci",
+    "prepublishOnly": "npm run ci"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UsikianLevon/draw-libre-react.git"
+  },
+  "keywords": [
+    "maplibre",
+    "mapbox",
+    "draw",
+    "draw-libre"
+  ],
+  "author": "Usikian Levon <levonhusikyan@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UsikianLevon/draw-libre-react/issues"
+  },
+  "homepage": "https://github.com/UsikianLevon/draw-libre-react#readme",
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "draw-libre": ">=0.5.0",
+    "mapbox-gl": ">=1",
+    "maplibre-gl": ">=2",
+    "react": ">=16.14.0",
+    "react-dom": ">=16.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.14.0",
+    "prettier": "3.2.5",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  },
+  "main": "dist/index.js",
+  "browser": "dist/index.js",
+  "style": "dist/index.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/index.css": "./dist/index.css"
+  },
+  "sideEffects": false
+}
