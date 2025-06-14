@@ -189,9 +189,9 @@ drawRef.current.removeAllSteps()
 drawRef.current.clear()
 // Save the current drawing state
 drawRef.current.save()
-// Undo the last action. Pass the original(!) DOM event when the dynamic line is enabled. Check the mdl:undostackchanged to disable/enable the button
+// Undo the last action. Pass the original(!) DOM event when the dynamic line is enabled. Check the onUndoStackChanged to disable/enable the button
 drawRef.current.undo(e)
-// Redo the last undone action. Pass the original(!) DOM event when the dynamic line is enabled. Check the mdl:redostackchanged to disable/enable the button
+// Redo the last undone action. Pass the original(!) DOM event when the dynamic line is enabled. Check the onRedoStackChanged to disable/enable the button
 drawRef.current.redo(e)
 
 // Update options. Note that options are immutable, so return a new object with spread values.
