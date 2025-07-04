@@ -35,11 +35,15 @@
     "dist"
   ],
   "peerDependencies": {
-    "draw-libre": ">=0.5.0",
+    "draw-libre": ">=0.6.0",
     "mapbox-gl": ">=1",
     "maplibre-gl": ">=2",
     "react": ">=16.14.0",
     "react-dom": ">=16.14.0"
+  },
+  "peerDependenciesMeta": {
+    "mapbox-gl": { "optional": true },
+    "maplibre-gl": { "optional": true }
   },
   "devDependencies": {
     "@types/react": "^16.14.0",
