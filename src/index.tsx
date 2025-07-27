@@ -35,7 +35,6 @@ export interface DrawLibreRef {
   getAllSteps: ReturnType<typeof DL.getInstance>["getAllSteps"];
   setSteps: ReturnType<typeof DL.getInstance>["setSteps"];
   removeAllSteps: ReturnType<typeof DL.getInstance>["removeAllSteps"];
-  setOptions: ReturnType<typeof DL.getInstance>["setOptions"];
   undo: ReturnType<typeof DL.getInstance>["undo"];
   redo: ReturnType<typeof DL.getInstance>["redo"];
   clear: ReturnType<typeof DL.getInstance>["clear"];
@@ -48,7 +47,6 @@ const handlersStub: DrawLibreRef = {
   getAllSteps: () => [],
   setSteps: () => {},
   removeAllSteps: () => {},
-  setOptions: () => {},
   undo: () => {},
   redo: () => {},
   clear: () => {},
@@ -97,14 +95,13 @@ const DrawLibre = forwardRef<DrawLibreRef, Props>(
           getAllSteps: drawInstance.getAllSteps,
           setSteps: drawInstance.setSteps,
           removeAllSteps: drawInstance.removeAllSteps,
-          setOptions: drawInstance.setOptions,
           undo: drawInstance.undo,
           redo: drawInstance.redo,
           clear: drawInstance.clear,
           save: drawInstance.save,
         };
       },
-      [drawInstance],
+      [drawInstance]
     );
 
     useEvent(map, "mdl:rightclickremove", props.onRightClickRemove);
@@ -120,13 +117,13 @@ const DrawLibre = forwardRef<DrawLibreRef, Props>(
     useEvent(map, "mdl:redostackchanged", props.onRedoStackChanged);
 
     return null;
-  },
+  }
 );
 
 const useEvent = (
   map: MapboxMap | LibreMap,
   eventName: string,
-  callback: ((event: any) => void) | undefined,
+  callback: ((event: any) => void) | undefined
 ) => {
   useEffect(() => {
     if (!map) return;
