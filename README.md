@@ -1,44 +1,14 @@
-# DrawLibre
+# DrawLibre React
 
-> ⭐ Early supporter? Your star makes a difference!
+React wrapper for [draw-libre](https://github.com/UsikianLevon/draw-libre). For the vanilla JS version, see the main repo.
 
-**⚠️ This is a React wrapper for the core library [draw-libre](https://github.com/UsikianLevon/draw-libre). If you're looking for the vanilla JS version, check out the main repo.**
-
-## 🚀 Features
-
-- Undo/redo support
-- Break closed geometry
-- Draw LineStrings (open/closed) and Polygons
-- Compatible with MapLibre GL (v2–v5) and Mapbox GL (v1–v3)
-- Works with all projections
-- Fully customizable UI & controls
-- Event-driven architecture for seamless integration
-
----
-
-### 🎯 Manual Point Generation
-
-> Extra points are added when a line is clicked
-
-![Manual Point Generation](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDZscnowMHNndmtiZzcwb3Bvc2Y2b29qbHdndndndGE3Mzk5Z2Q0cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/m6lig0ZCfL45FZQo7b/giphy.gif)
-
-### 🤖 Automatic Point Generation
-
-> Auxiliary point is generated between every two primary points
-
-![Automatic Point Generation](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2VieG1rd3ZkaWt5azVhYWpqaWEwZnVybGdjYW90d2xwNWwzeWtzayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6ohjkf9L1NWUESTaQA/giphy.gif)
-
----
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install draw-libre-react
 ```
 
----
-
-## ⚡ Quick Start
+## Quick start
 
 ```tsx
 import maplibregl from "maplibre-gl";
@@ -49,39 +19,38 @@ const map = // your map instance
 {map && <DrawLibre map={map} />}
 ```
 
----
+## Configuration
 
-## ⚙️ API Reference
-
-### Configuration
+All props besides `map` are optional. The options mirror the core library — see [draw-libre docs](https://github.com/UsikianLevon/draw-libre) for details.
 
 ```tsx
 <DrawLibre
   map={map}
-  pointGeneration="manual" // or "auto"; pointGeneration controls whether additional points are automatically generated on the line or if you place them manually by clicking.
+  // "manual" (default) — click a segment to add a point
+  // "auto" — midpoints generated automatically
+  pointGeneration="manual"
   modes={{
-    initial: null, // default value; can be "line" or "polygon". Initial mode for drawing
-    breakGeometry: { visible: true }, // Controls visibility of the break geometry button
+    initial: null, // starting mode: null | "line" | "polygon"
+    breakGeometry: { visible: true },
     line: {
-      closeGeometry: true, // Enables/disables ability to close a LineString
-      visible: true, // Controls visibility of the line drawing button
+      closeGeometry: true,
+      visible: true,
     },
-    polygon: { visible: true }, // Controls visibility of the polygon drawing button
+    polygon: { visible: true },
   }}
   panel={{
-    size: "medium", // "large" || "small" - Controls size of the panel that appears after pressing a button
+    size: "medium", // "small" | "medium" | "large"
     buttons: {
-      delete: { visible: true }, // Controls visibility of the delete all points button
-      redo: { visible: true }
+      delete: { visible: true },
+      redo: { visible: true },
+      undo: { visible: true },
       save: {
-        clearOnSave: true, // Whether to clear all points after saving
-        visible: true, // Controls visibility of the save button
+        clearOnSave: true,
+        visible: true,
       },
-      undo: { visible: true }, // Controls visibility of the undo button
     },
   }}
   locale={{
-    // Customize button labels and tooltips
     break: "Break",
     closeLine: "Close",
     createPolygon: "Create",
@@ -92,8 +61,9 @@ const map = // your map instance
     undo: "Undo",
     redo: "Redo",
   }}
+  // Override layer paint properties.
+  // See MapLibre style spec for available options.
   layersPaint={{
-    // Customize layer styles here. Refer to MapLibre's layer specifications for options.
     onLinePoint: {}, // CircleLayerSpecification["paint"]
     firstPoint: {}, // CircleLayerSpecification["paint"]
     points: {}, // CircleLayerSpecification["paint"]
@@ -101,16 +71,15 @@ const map = // your map instance
     polygon: {}, // FillLayerSpecification["paint"]
     breakLine: {}, // LineLayerSpecification["paint"]
   }}
-  dynamicLine={true} // Whether to draw a dynamic line following the cursor after placing the first point. It's always false for mobile phones(when the viewport is less than 768)
+  // Dynamic line following cursor after first point.
+  // Always false on viewports < 768px.
+  dynamicLine={true}
   initial={{
-    // Initialize with pre-existing GeoJSON data
-    closeGeometry: false, // Specify if the geometry is closed. Must be true if the geometry type is polygon.
-    generateId: true, // Whether to generate unique IDs for your geometries. Should be true if there are no IDs for each point in `steps`.
-    geometry: "line", // "line" | "polygon" - Specifies the type of geometry to initialize
+    geometry: "line", // "line" | "polygon"
+    closeGeometry: false, // must be true for polygons
+    generateId: true, // auto-generate IDs if missing
     steps: [
-      // Array of {id?: string | number, lat: number, lng: number}
-      // The first and the last point should be the same if the geometry is closed.
-      // The closeGeometry also should be true in this case.
+      // For closed geometries, first and last point must match.
       { lat: 40, lng: 30 },
       { lat: 31, lng: 21 },
       { lat: 31, lng: 21 },
@@ -119,103 +88,86 @@ const map = // your map instance
 />
 ```
 
----
-
-## 🔔 Events
-
-Use event callbacks to handle user interaction:
+## Events
 
 ```tsx
 <DrawLibre
   map={map}
-  onPointAdd={() => console.log("Point added")}
-  onPointEnter={() => console.log("Point entered")}
-  onPointLeave={() => console.log("Point leave")}
-  onModeChange={(mode) => console.log("Mode changed to:", mode)}
-  onPointMove={(point) => console.log("Point moved", point)}
-  onRemoveAll={() => console.log("All points removed")}
-  onRightClickRemove={() => console.log("Right click remove")}
-  onSave={(steps) => console.log("Saved steps:", steps)}
-  onUndo={() => console.log("Undo action")}
-  onUndoStackChanged={(event) => console.log(event)}
-  onRedoStackChanged={(event) => console.log(event)}
+  onPointAdd={(e) => console.log("added", e)}
+  onPointMove={(e) => console.log("moved", e)}
+  onPointEnter={(e) => console.log("enter", e)}
+  onPointLeave={(e) => console.log("leave", e)}
+  onRightClickRemove={(e) => console.log("removed", e)}
+  onRemoveAll={(e) => console.log("cleared", e)}
+  onModeChange={(e) => console.log("mode", e)}
+  onSave={(e) => console.log("saved", e)}
+  onUndo={(e) => console.log("undo", e)}
+  onUndoStackChanged={(e) => console.log(e)}
+  onRedoStackChanged={(e) => console.log(e)}
 />
 ```
 
-### Available Event Types
+| Prop                 | Event type                   |
+| -------------------- | ---------------------------- |
+| `onPointAdd`         | `PointAddEvent`              |
+| `onPointMove`        | `PointMoveEvent`             |
+| `onPointEnter`       | `PointEnterEvent`            |
+| `onPointLeave`       | `PointLeaveEvent`            |
+| `onRightClickRemove` | `PointRightClickRemoveEvent` |
+| `onRemoveAll`        | `RemoveAllEvent`             |
+| `onModeChange`       | `ModeChangeEvent`            |
+| `onSave`             | `SaveEvent`                  |
+| `onUndo`             | `UndoEvent`                  |
+| `onUndoStackChanged` | `UndoStackChangeEvent`       |
+| `onRedoStackChanged` | `RedoStackChangeEvent`       |
 
-- `onRightClickRemove` (PointRightClickRemoveEvent)
-- `onPointEnter` (PointEnterEvent)
-- `onPointLeave` (PointLeaveEvent)
-- `onPointMove` (PointMoveEvent)
-- `onPointAdd` (PointAddEvent)
-- `onUndo` (UndoEvent)
-- `onRemoveAll` (RemoveAllEvent)
-- `onSave` (SaveEvent)
-- `onModeChange` (ModeChangeEvent)
-- `onUndoStackChanged` (UndoStackChangeEvent)
-- `onRedoStackChanged` (RedoStackChangeEvent)
+## Methods
 
----
-
-## 🧠 Methods
+Access imperative methods via ref:
 
 ```tsx
 import DrawLibre, { DrawLibreRef } from "draw-libre-react";
+
 const drawRef = useRef<DrawLibreRef>(null);
 
-<DrawLibre
-  ref={drawRef}
-  map={map}
-/>
-
-// Retrieves a step from the store by its ID.
-drawRef.current.findStepById(id: string)
-
-// Retrieves a node from the store by its ID.
-drawRef.current.findNodeById(id: string)
-
-// Get all steps, optionally specifying the return type. Selecting 'linkedlist' will return a circular doubly linked list. Have fun.
-drawRef.current.getAllSteps(type?: "array" | "linkedlist")
-
-// Set new steps. If ID is not provided, it will be generated automatically
-drawRef.current.setSteps(steps: {lat: number; lng: number; id?: string}[])
-
-// Remove all steps
-drawRef.current.removeAllSteps()
-
-// If you don't like the panel, you can hide it in options and use these handlers to create your own panel
-// Clear all steps from the drawing
-drawRef.current.clear()
-// Save the current drawing state
-drawRef.current.save()
-// Undo the last action. Pass the original(!) DOM event when the dynamic line is enabled. Check the onUndoStackChanged to disable/enable the button
-drawRef.current.undo(e)
-// Redo the last undone action. Pass the original(!) DOM event when the dynamic line is enabled. Check the onRedoStackChanged to disable/enable the button
-drawRef.current.redo(e)
-
-// Update options. Note that options are immutable, so return a new object with spread values.
-drawRef.current.setOptions((options: RequiredDrawOptions) => {
-  return {
-    ...options,
-    locale: {
-      ...options.locale,
-      save: "Save update",
-    },
-    modes: {
-      ...options.modes,
-      line: {
-        ...options.modes.line,
-        closeGeometry: false,
-      },
-    },
-    dynamicLine: false,
-  };
-});
+<DrawLibre ref={drawRef} map={map} />;
 ```
 
----
+```tsx
+// Query
+drawRef.current.findStepById(id: string)
+drawRef.current.findNodeById(id: string)
+drawRef.current.getAllSteps(type?: "array" | "linkedlist")
 
-## 📄 License
+// Mutate
+drawRef.current.setSteps(steps: { lat: number; lng: number; id?: string }[])
+drawRef.current.removeAllSteps()
 
-[MIT License](https://opensource.org/licenses/MIT)
+// Panel actions (useful if you hide the built-in panel)
+drawRef.current.clear()
+drawRef.current.save()
+drawRef.current.undo(e)   // pass DOM event when dynamicLine is on
+drawRef.current.redo(e)   // same
+```
+
+Check `onUndoStackChanged` / `onRedoStackChanged` to know when undo/redo are available.
+
+### Updating options at runtime
+
+Options are immutable — return a new object:
+
+```tsx
+drawRef.current.setOptions((options: RequiredDrawOptions) => ({
+  ...options,
+  dynamicLine: false,
+  locale: { ...options.locale, save: "Save update" },
+  modes: {
+    ...options.modes,
+    line: { ...options.modes.line, closeGeometry: false },
+  },
+}));
+```
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
