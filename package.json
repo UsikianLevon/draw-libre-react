@@ -1,18 +1,30 @@
 {
   "name": "draw-libre-react",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "React wrapper for the draw-libre library.",
-  "private": false,
   "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "tsup",
-    "build:w": "tsup --watch",
-    "dev": "tsc -w",
-    "lint": "tsc",
-    "prettier": "prettier --write .",
-    "exports": "attw --pack .",
-    "ci": "npm run lint && npm run prettier && npm run build",
-    "release": "npm run ci",
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check:exports": "publint && attw --pack . --profile esm-only",
+    "check:consumers": "node scripts/check-consumers.mjs",
+    "ci": "npm run typecheck && npm run format:check && npm run build && npm run check:exports && npm run check:consumers && npm test",
     "prepublishOnly": "npm run ci"
   },
   "repository": {
@@ -23,7 +35,8 @@
     "maplibre",
     "mapbox",
     "draw",
-    "draw-libre"
+    "draw-libre",
+    "react"
   ],
   "author": "Usikian Levon <levonhusikyan@gmail.com>",
   "license": "MIT",
@@ -31,40 +44,32 @@
     "url": "https://github.com/UsikianLevon/draw-libre-react/issues"
   },
   "homepage": "https://github.com/UsikianLevon/draw-libre-react#readme",
-  "files": [
-    "dist"
-  ],
   "peerDependencies": {
-    "draw-libre": ">=0.6.1",
-    "mapbox-gl": ">=1",
-    "maplibre-gl": ">=2",
-    "react": ">=16.14.0",
-    "react-dom": ">=16.14.0"
-  },
-  "peerDependenciesMeta": {
-    "mapbox-gl": {
-      "optional": true
-    },
-    "maplibre-gl": {
-      "optional": true
-    }
+    "draw-libre": "^1.0.0",
+    "react": ">=16.14.0"
   },
   "devDependencies": {
-    "@types/react": "^16.14.0",
-    "prettier": "3.2.5",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@types/node": "^24.13.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitest/browser-playwright": "^5.0.1",
+    "draw-libre": "^1.0.0",
+    "maplibre-gl": "^6.10.0",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.7",
+    "publint": "^0.3.24",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.1"
   },
-  "main": "dist/index.js",
-  "browser": "dist/index.js",
-  "style": "dist/index.css",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./dist/index.css": "./dist/index.css"
-  },
-  "sideEffects": false
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22.18.0",
+      "onFail": "error"
+    }
+  }
 }

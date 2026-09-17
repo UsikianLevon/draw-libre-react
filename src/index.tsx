@@ -1,145 +1,90 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import type { Map as LibreMap } from "maplibre-gl";
-import type { Map as MapboxMap } from "mapbox-gl";
-import DL, {
-  type PointRightClickRemoveEvent,
-  type DrawOptions,
-  type SaveEvent,
-  type UndoEvent,
-  type ModeChangeEvent,
-  type PointAddEvent,
-  type PointEnterEvent,
-  type PointLeaveEvent,
-  type PointMoveEvent,
-  type RemoveAllEvent,
-} from "draw-libre";
-import "draw-libre/dist/index.css";
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import Core from "draw-libre";
+import type { DrawLibreControl, DrawLibreEventType, DrawOptions } from "draw-libre";
 
-interface DrawLibreEventHandlers {
-  onRightClickRemove?: (event: PointRightClickRemoveEvent) => void;
-  onSave?: (event: SaveEvent) => void;
-  onUndo?: (event: UndoEvent) => void;
-  onRemoveAll?: (event: RemoveAllEvent) => void;
-  onModeChange?: (event: ModeChangeEvent) => void;
-  onPointEnter?: (event: PointEnterEvent) => void;
-  onPointLeave?: (event: PointLeaveEvent) => void;
-  onPointMove?: (event: PointMoveEvent) => void;
-  onPointAdd?: (event: PointAddEvent) => void;
-  onUndoStackChanged?: (event: { length: number }) => void;
-  onRedoStackChanged?: (event: { length: number }) => void;
+export type DrawLibreRef = Core;
+
+type Placement = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+// method syntax keeps parameters bivariant, so maplibre and mapbox maps both fit
+interface DrawLibreMap {
+  addControl(control: DrawLibreControl, position?: Placement): unknown;
+  removeControl(control: DrawLibreControl): unknown;
 }
 
-export interface DrawLibreRef {
-  findStepById: ReturnType<typeof DL.getInstance>["findStepById"];
-  findNodeById: ReturnType<typeof DL.getInstance>["findNodeById"];
-  getAllSteps: ReturnType<typeof DL.getInstance>["getAllSteps"];
-  setSteps: ReturnType<typeof DL.getInstance>["setSteps"];
-  removeAllSteps: ReturnType<typeof DL.getInstance>["removeAllSteps"];
-  undo: ReturnType<typeof DL.getInstance>["undo"];
-  redo: ReturnType<typeof DL.getInstance>["redo"];
-  clear: ReturnType<typeof DL.getInstance>["clear"];
-  save: ReturnType<typeof DL.getInstance>["save"];
-}
+const EVENT_BY_PROP = {
+  onPointAdd: "mdl:add",
+  onPointRemove: "mdl:pointremove",
+  onPointEnter: "mdl:pointenter",
+  onPointLeave: "mdl:pointleave",
+  onPointMove: "mdl:moveend",
+  onUndo: "mdl:undo",
+  onRedo: "mdl:redo",
+  onRemoveAll: "mdl:removeall",
+  onSave: "mdl:save",
+  onBreak: "mdl:break",
+  onModeChange: "mdl:modechanged",
+  onUndoStackChanged: "mdl:undostackchanged",
+  onRedoStackChanged: "mdl:redostackchanged",
+} as const satisfies Record<string, keyof DrawLibreEventType>;
 
-const handlersStub: DrawLibreRef = {
-  findStepById: () => null,
-  findNodeById: () => null,
-  getAllSteps: () => [],
-  setSteps: () => {},
-  removeAllSteps: () => {},
-  undo: () => {},
-  redo: () => {},
-  clear: () => {},
-  save: () => {},
+type EventByProp = typeof EVENT_BY_PROP;
+type HandlerProp = keyof EventByProp;
+
+type DrawLibreEventHandlers = {
+  [P in HandlerProp]?: (event: DrawLibreEventType[EventByProp[P]]) => void;
 };
 
-interface Props extends DrawOptions, DrawLibreEventHandlers {
-  map: LibreMap | MapboxMap;
-  placement?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export interface DrawLibreProps extends DrawOptions, DrawLibreEventHandlers {
+  map: DrawLibreMap;
+  placement?: Placement;
 }
 
-const DrawLibre = forwardRef<DrawLibreRef, Props>(
-  ({ map, placement = "bottom-right", ...props }, ref) => {
-    const [drawInstance, setDrawInstance] = useState<ReturnType<
-      typeof DL.getInstance
-    > | null>(null);
+const HANDLER_PROPS = Object.keys(EVENT_BY_PROP) as HandlerProp[];
 
-    useEffect(() => {
-      if (!map) {
-        throw new Error("Map instance is required");
-      }
-      const draw = DL.getInstance({
-        ...props,
-      });
-      // we just don't care about the type(Map from libre or box) here, as we know it's a Map instance which has addControl method(because they all do)
-      // @ts-ignore
-      map.addControl(draw, placement);
-      setDrawInstance(draw);
+// a new core option fails tsc here instead of being dropped at runtime
+const OPTION_KEYS = {
+  pointGeneration: true,
+  panel: true,
+  modes: true,
+  layersPaint: true,
+  initial: true,
+  locale: true,
+  dynamicLine: true,
+} satisfies Record<keyof DrawOptions, true>;
 
-      return () => {
-        if (!map) return;
-        // @ts-ignore
-        map.removeControl(draw);
-      };
-    }, [map, placement, props]);
+const pickOptions = (props: DrawLibreProps): DrawOptions => {
+  const options: Record<string, unknown> = {};
+  for (const key of Object.keys(OPTION_KEYS) as (keyof DrawOptions)[]) options[key] = props[key];
+  return options as DrawOptions;
+};
 
-    useImperativeHandle(
-      ref,
-      () => {
-        if (!drawInstance) {
-          return handlersStub;
-        }
-        return {
-          findStepById: drawInstance.findStepById,
-          findNodeById: drawInstance.findNodeById,
-          getAllSteps: drawInstance.getAllSteps,
-          setSteps: drawInstance.setSteps,
-          removeAllSteps: drawInstance.removeAllSteps,
-          undo: drawInstance.undo,
-          redo: drawInstance.redo,
-          clear: drawInstance.clear,
-          save: drawInstance.save,
-        };
-      },
-      [drawInstance]
-    );
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-    useEvent(map, "mdl:rightclickremove", props.onRightClickRemove);
-    useEvent(map, "mdl:save", props.onSave);
-    useEvent(map, "mdl:undo", props.onUndo);
-    useEvent(map, "mdl:add", props.onPointAdd);
-    useEvent(map, "mdl:removeall", props.onRemoveAll);
-    useEvent(map, "mdl:modechanged", props.onModeChange);
-    useEvent(map, "mdl:pointenter", props.onPointEnter);
-    useEvent(map, "mdl:pointleave", props.onPointLeave);
-    useEvent(map, "mdl:moveend", props.onPointMove);
-    useEvent(map, "mdl:undostackchanged", props.onUndoStackChanged);
-    useEvent(map, "mdl:redostackchanged", props.onRedoStackChanged);
+const DrawLibre = forwardRef<DrawLibreRef, DrawLibreProps>(function DrawLibre(props, ref) {
+  const { map } = props;
+  const latest = useRef(props);
+  useIsomorphicLayoutEffect(() => {
+    latest.current = props;
+  });
 
-    return null;
-  }
-);
+  const [draw, setDraw] = useState<DrawLibreRef | null>(null);
+  useImperativeHandle<DrawLibreRef | null, DrawLibreRef | null>(ref, () => draw, [draw]);
 
-const useEvent = (
-  map: MapboxMap | LibreMap,
-  eventName: string,
-  callback: ((event: any) => void) | undefined
-) => {
   useEffect(() => {
-    if (!map) return;
-    if (!callback) return;
-
-    // again, we don't care, it's a map instance for sure
-    // @ts-ignore
-    map.on(eventName, callback);
+    const control = new Core(pickOptions(latest.current));
+    const subscriptions = HANDLER_PROPS.map((prop) =>
+      control.on(EVENT_BY_PROP[prop], (event) => latest.current[prop]?.(event as never)),
+    );
+    map.addControl(control, latest.current.placement ?? "bottom-right");
+    setDraw(control);
     return () => {
-      if (!map) return;
-      if (!callback) return;
-
-      // @ts-ignore
-      map.off(eventName, callback);
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
+      map.removeControl(control);
     };
-  }, [map, eventName, callback]);
-};
+  }, [map]);
+
+  return null;
+});
 
 export default DrawLibre;

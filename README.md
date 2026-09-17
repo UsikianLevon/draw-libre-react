@@ -1,172 +1,168 @@
 # DrawLibre React
 
-React wrapper for [draw-libre](https://github.com/UsikianLevon/draw-libre). For the vanilla JS version, see the main repo.
+React wrapper for [draw-libre](https://github.com/UsikianLevon/draw-libre), a tool for drawing lines and polygons on
+[MapLibre GL](https://maplibre.org/) and [Mapbox GL](https://docs.mapbox.com/mapbox-gl-js/) maps.
+
+Requires React 16.14 or newer and draw-libre 1.x.
 
 ## Installation
 
 ```bash
-npm install draw-libre-react
+npm install draw-libre-react draw-libre maplibre-gl
+```
+
+Import the draw-libre styles once, next to your map styles:
+
+```ts
+import "maplibre-gl/dist/maplibre-gl.css";
+import "draw-libre/dist/index.css";
 ```
 
 ## Quick start
 
 ```tsx
-import maplibregl from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
+import * as maplibregl from "maplibre-gl";
 import DrawLibre from "draw-libre-react";
 
-const map = // your map instance
+export function App() {
+  const container = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
 
-{map && <DrawLibre map={map} />}
+  useEffect(() => {
+    const instance = new maplibregl.Map({
+      container: container.current!,
+      style: "https://demotiles.maplibre.org/style.json",
+    });
+    // the control can be added only after the style has loaded
+    instance.once("load", () => setMap(instance));
+    return () => {
+      setMap(null);
+      instance.remove();
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={container} style={{ height: "100vh" }} />
+      {map && <DrawLibre map={map} panel={{ buttons: { undo: { visible: true }, save: { visible: true } } }} />}
+    </>
+  );
+}
 ```
 
-## Configuration
+Render `<DrawLibre>` only after the map fired `load`. Mounting earlier throws `Style is not done loading` into the
+nearest error boundary.
 
-All props besides `map` are optional. The options mirror the core library — see [draw-libre docs](https://github.com/UsikianLevon/draw-libre) for details.
+## Props
+
+| Prop        | Type                                                                 | Default          |
+| ----------- | -------------------------------------------------------------------- | ---------------- |
+| `map`       | a maplibre-gl or mapbox-gl `Map`                                     | required         |
+| `placement` | `"top-left"` \| `"top-right"` \| `"bottom-left"` \| `"bottom-right"` | `"bottom-right"` |
+
+Every draw-libre option is a prop: `pointGeneration`, `modes`, `panel`, `locale`, `layersPaint`, `dynamicLine` and
+`initial`. See the [draw-libre configuration](https://github.com/UsikianLevon/draw-libre#configuration) for their
+shapes and defaults. The built-in panel buttons are hidden unless you set `visible: true`.
+
+### Options are read once
+
+Options and `placement` are read when the control mounts. Later changes to them are ignored, so a parent re-render
+never wipes the drawing. To apply new options, change the `key`:
 
 ```tsx
-<DrawLibre
-  map={map}
-  // "manual" (default) — click a segment to add a point
-  // "auto" — midpoints generated automatically
-  pointGeneration="manual"
-  modes={{
-    initial: null, // starting mode: null | "line" | "polygon"
-    breakGeometry: { visible: true },
-    line: {
-      closeGeometry: true,
-      visible: true,
-    },
-    polygon: { visible: true },
-  }}
-  panel={{
-    size: "medium", // "small" | "medium" | "large"
-    buttons: {
-      delete: { visible: true },
-      redo: { visible: true },
-      undo: { visible: true },
-      save: {
-        clearOnSave: true,
-        visible: true,
-      },
-    },
-  }}
-  locale={{
-    break: "Break",
-    closeLine: "Close",
-    createPolygon: "Create",
-    delete: "Delete",
-    line: "Line",
-    polygon: "Polygon",
-    save: "Save",
-    undo: "Undo",
-    redo: "Redo",
-  }}
-  // Override layer paint properties.
-  // See MapLibre style spec for available options.
-  layersPaint={{
-    onLinePoint: {}, // CircleLayerSpecification["paint"]
-    firstPoint: {}, // CircleLayerSpecification["paint"]
-    points: {}, // CircleLayerSpecification["paint"]
-    line: {}, // LineLayerSpecification["paint"]
-    polygon: {}, // FillLayerSpecification["paint"]
-    breakLine: {}, // LineLayerSpecification["paint"]
-  }}
-  // Dynamic line following cursor after first point.
-  // Always false on viewports < 768px.
-  dynamicLine={true}
-  initial={{
-    geometry: "line", // "line" | "polygon"
-    closeGeometry: false, // must be true for polygons
-    generateId: true, // auto-generate IDs if missing
-    steps: [
-      // For closed geometries, first and last point must match.
-      { lat: 40, lng: 30 },
-      { lat: 31, lng: 21 },
-      { lat: 31, lng: 21 },
-    ],
-  }}
-/>
+<DrawLibre key={language} map={map} locale={LOCALES[language]} />
 ```
+
+A new `key`, or a different `map`, mounts a new control: the drawing and the undo history are lost.
 
 ## Events
 
+Event handlers may change on every render, the latest one is always called.
+
+| Prop                 | draw-libre event       | Payload type           |
+| -------------------- | ---------------------- | ---------------------- |
+| `onPointAdd`         | `mdl:add`              | `PointAddEvent`        |
+| `onPointRemove`      | `mdl:pointremove`      | `PointRemoveEvent`     |
+| `onPointEnter`       | `mdl:pointenter`       | `PointEnterEvent`      |
+| `onPointLeave`       | `mdl:pointleave`       | `PointLeaveEvent`      |
+| `onPointMove`        | `mdl:moveend`          | `PointMoveEvent`       |
+| `onUndo`             | `mdl:undo`             | `UndoEvent`            |
+| `onRedo`             | `mdl:redo`             | `RedoEvent`            |
+| `onRemoveAll`        | `mdl:removeall`        | `RemoveAllEvent`       |
+| `onSave`             | `mdl:save`             | `SaveEvent`            |
+| `onBreak`            | `mdl:break`            | `BreakEvent`           |
+| `onModeChange`       | `mdl:modechanged`      | `ModeChangeEvent`      |
+| `onUndoStackChanged` | `mdl:undostackchanged` | `UndoStackChangeEvent` |
+| `onRedoStackChanged` | `mdl:redostackchanged` | `RedoStackChangeEvent` |
+
+Payload types come from `draw-libre`:
+
 ```tsx
-<DrawLibre
-  map={map}
-  onPointAdd={(e) => console.log("added", e)}
-  onPointMove={(e) => console.log("moved", e)}
-  onPointEnter={(e) => console.log("enter", e)}
-  onPointLeave={(e) => console.log("leave", e)}
-  onRightClickRemove={(e) => console.log("removed", e)}
-  onRemoveAll={(e) => console.log("cleared", e)}
-  onModeChange={(e) => console.log("mode", e)}
-  onSave={(e) => console.log("saved", e)}
-  onUndo={(e) => console.log("undo", e)}
-  onUndoStackChanged={(e) => console.log(e)}
-  onRedoStackChanged={(e) => console.log(e)}
-/>
+import type { SaveEvent } from "draw-libre";
+
+const onSave = (event: SaveEvent) => console.log(event.steps);
 ```
 
-| Prop                 | Event type                   |
-| -------------------- | ---------------------------- |
-| `onPointAdd`         | `PointAddEvent`              |
-| `onPointMove`        | `PointMoveEvent`             |
-| `onPointEnter`       | `PointEnterEvent`            |
-| `onPointLeave`       | `PointLeaveEvent`            |
-| `onRightClickRemove` | `PointRightClickRemoveEvent` |
-| `onRemoveAll`        | `RemoveAllEvent`             |
-| `onModeChange`       | `ModeChangeEvent`            |
-| `onSave`             | `SaveEvent`                  |
-| `onUndo`             | `UndoEvent`                  |
-| `onUndoStackChanged` | `UndoStackChangeEvent`       |
-| `onRedoStackChanged` | `RedoStackChangeEvent`       |
+`onModeChange` also fires while the control mounts, with the initial mode (`null` unless `modes.initial` is set). In
+development under `StrictMode` React mounts effects twice, so it fires on each mount.
 
-## Methods
+## Ref
 
-Access imperative methods via ref:
+The ref holds the draw-libre instance, so every [draw-libre method](https://github.com/UsikianLevon/draw-libre#methods)
+is available:
 
 ```tsx
-import DrawLibre, { DrawLibreRef } from "draw-libre-react";
+import { useRef } from "react";
+import DrawLibre, { type DrawLibreRef } from "draw-libre-react";
 
 const drawRef = useRef<DrawLibreRef>(null);
 
 <DrawLibre ref={drawRef} map={map} />;
+
+drawRef.current?.getAllSteps();
+drawRef.current?.setSteps([{ lat: 40, lng: 30 }]);
+drawRef.current?.undo();
+drawRef.current?.redo();
+drawRef.current?.clear();
+drawRef.current?.save();
 ```
 
-```tsx
-// Query
-drawRef.current.findStepById(id: string)
-drawRef.current.findNodeById(id: string)
-drawRef.current.getAllSteps(type?: "array" | "linkedlist")
+`drawRef.current` is `null` until the control is mounted and after it is removed. It is also still `null` inside the
+parent's own mount effect: the instance arrives one render later. Pass starting geometry through `initial` instead of
+calling `setSteps` on mount.
 
-// Mutate
-drawRef.current.setSteps(steps: { lat: number; lng: number; id?: string }[])
-drawRef.current.removeAllSteps()
+The parent does not re-render when the instance arrives. To react to it, pass a callback ref:
+`<DrawLibre ref={(draw) => draw && onReady(draw)} map={map} />`.
 
-// Panel actions (useful if you hide the built-in panel)
-drawRef.current.clear()
-drawRef.current.save()
-drawRef.current.undo(e)   // pass DOM event when dynamicLine is on
-drawRef.current.redo(e)   // same
-```
+## One control at a time
 
-Check `onUndoStackChanged` / `onRedoStackChanged` to know when undo/redo are available.
+draw-libre allows one mounted control per page, across all maps. A second `<DrawLibre>` mounted at the same time
+throws `DrawLibre is already added to a map` into the nearest error boundary, while the first keeps working. Unmount
+the first one before mounting another. Changing `key` or `map` is fine: the old control is removed before the new
+one is added.
 
-### Updating options at runtime
+Calling `map.remove()` before `<DrawLibre>` unmounts is safe.
 
-Options are immutable — return a new object:
+## TypeScript
 
-```tsx
-drawRef.current.setOptions((options: RequiredDrawOptions) => ({
-  ...options,
-  dynamicLine: false,
-  locale: { ...options.locale, save: "Save update" },
-  modes: {
-    ...options.modes,
-    line: { ...options.modes.line, closeGeometry: false },
-  },
-}));
-```
+`DrawLibreProps` and `DrawLibreRef` are exported. Option and event types come from `draw-libre`. `map` accepts
+maplibre-gl and mapbox-gl maps without casts; the typings are checked against maplibre-gl 2, 5 and 6, mapbox-gl 3 and
+`@types/react` 16, 18 and 19. With mapbox-gl and `skipLibCheck: false`, install `@types/geojson`: the draw-libre
+typings reference it and mapbox-gl does not bring it.
+
+## Migrating from 0.2
+
+| 0.2                                                                   | 1.0                                                                        |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| peer `draw-libre >=0.6.1`                                             | peer `draw-libre ^1.0.0`                                                   |
+| CSS imported by the wrapper, `draw-libre-react/dist/index.css` export | `import "draw-libre/dist/index.css"` yourself; the wrapper subpath is gone |
+| `onRightClickRemove`                                                  | `onPointRemove`                                                            |
+| no redo and break events                                              | `onRedo`, `onBreak`                                                        |
+| `DrawLibreRef` with nine methods                                      | `DrawLibreRef` is the draw-libre instance                                  |
+| ref methods are no-ops before mount                                   | `ref.current` is `null` before mount                                       |
+| option changes recreate the control                                   | options are read once, change `key` to recreate                            |
+| `setOptions`                                                          | removed, change `key`                                                      |
 
 ## License
 
