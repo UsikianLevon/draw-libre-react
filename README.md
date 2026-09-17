@@ -135,15 +135,6 @@ calling `setSteps` on mount.
 The parent does not re-render when the instance arrives. To react to it, pass a callback ref:
 `<DrawLibre ref={(draw) => draw && onReady(draw)} map={map} />`.
 
-## One control at a time
-
-draw-libre allows one mounted control per page, across all maps. A second `<DrawLibre>` mounted at the same time
-throws `DrawLibre is already added to a map` into the nearest error boundary, while the first keeps working. Unmount
-the first one before mounting another. Changing `key` or `map` is fine: the old control is removed before the new
-one is added.
-
-Calling `map.remove()` before `<DrawLibre>` unmounts is safe.
-
 ## TypeScript
 
 `DrawLibreProps` and `DrawLibreRef` are exported. Option and event types come from `draw-libre`. `map` accepts
