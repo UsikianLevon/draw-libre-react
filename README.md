@@ -151,19 +151,6 @@ maplibre-gl and mapbox-gl maps without casts; the typings are checked against ma
 `@types/react` 16, 18 and 19. With mapbox-gl and `skipLibCheck: false`, install `@types/geojson`: the draw-libre
 typings reference it and mapbox-gl does not bring it.
 
-## Migrating from 0.2
-
-| 0.2                                                                   | 1.0                                                                        |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| peer `draw-libre >=0.6.1`                                             | peer `draw-libre ^1.0.0`                                                   |
-| CSS imported by the wrapper, `draw-libre-react/dist/index.css` export | `import "draw-libre/dist/index.css"` yourself; the wrapper subpath is gone |
-| `onRightClickRemove`                                                  | `onPointRemove`                                                            |
-| no redo and break events                                              | `onRedo`, `onBreak`                                                        |
-| `DrawLibreRef` with nine methods                                      | `DrawLibreRef` is the draw-libre instance                                  |
-| ref methods are no-ops before mount                                   | `ref.current` is `null` before mount                                       |
-| option changes recreate the control                                   | options are read once, change `key` to recreate                            |
-| `setOptions`                                                          | removed, change `key`                                                      |
-
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
