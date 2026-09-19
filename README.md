@@ -63,8 +63,8 @@ nearest error boundary.
 | `map`       | a maplibre-gl or mapbox-gl `Map`                                     | required         |
 | `placement` | `"top-left"` \| `"top-right"` \| `"bottom-left"` \| `"bottom-right"` | `"bottom-right"` |
 
-Every draw-libre option is a prop: `pointGeneration`, `modes`, `panel`, `locale`, `layersPaint`, `dynamicLine` and
-`initial`. See the [draw-libre configuration](https://github.com/UsikianLevon/draw-libre#configuration) for their
+Every draw-libre option is a prop: `pointGeneration`, `modes`, `panel`, `locale`, `layersPaint`, `layersLayout`, `dynamicLine`
+and `initial`. See the [draw-libre configuration](https://github.com/UsikianLevon/draw-libre#configuration) for their
 shapes and defaults. The built-in panel buttons are hidden unless you set `visible: true`.
 
 ### Options are read once

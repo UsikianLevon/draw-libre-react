@@ -1,6 +1,6 @@
 {
   "name": "draw-libre-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React wrapper for the draw-libre library.",
   "type": "module",
   "sideEffects": false,
@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/UsikianLevon/draw-libre-react#readme",
   "peerDependencies": {
-    "draw-libre": "^1.0.0",
+    "draw-libre": "^1.0.4",
     "react": ">=16.14.0"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitest/browser-playwright": "^5.0.1",
-    "draw-libre": "^1.0.0",
+    "draw-libre": "^1.0.4",
     "maplibre-gl": "^6.10.0",
     "playwright": "^1.63.0",
     "prettier": "^3.9.7",

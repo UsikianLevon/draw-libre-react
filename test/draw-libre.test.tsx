@@ -56,6 +56,15 @@ describe("mounting", () => {
     view.unmount();
   });
 
+  it("passes layersLayout to the core layers", async () => {
+    const map = await createLoadedMap();
+
+    const view = render(<DrawLibre map={map} layersLayout={{ line: { "line-cap": "round" } }} />);
+
+    expect(map.getLayoutProperty("mdl-line-layer", "line-cap")).toBe("round");
+    view.unmount();
+  });
+
   it.skipIf(!supportsStrictEffects)("mounts a single working control in StrictMode", async () => {
     const map = await createLoadedMap();
     const ref = createRef<DrawLibreRef>();

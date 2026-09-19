@@ -48,6 +48,7 @@ const OPTION_KEYS = {
   panel: true,
   modes: true,
   layersPaint: true,
+  layersLayout: true,
   initial: true,
   locale: true,
   dynamicLine: true,
