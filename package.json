@@ -1,6 +1,6 @@
 {
   "name": "draw-libre-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React wrapper for the draw-libre library.",
   "type": "module",
   "sideEffects": false,
